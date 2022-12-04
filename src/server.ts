@@ -1,10 +1,11 @@
 import express, { Application } from "express";
 import { IncomingMessage } from "http";
 import WebSocket, { WebSocketServer } from 'ws';
-import { DownloadConnection } from "./DownloadConnection";
-import { sessions } from "./Sessions";
-import { UploadConnection } from "./UploadConnection";
 import crypto from 'crypto';
+
+import { DownloadConnection } from "./DownloadConnection";
+import { UploadConnection } from "./UploadConnection";
+import { sessions } from "./Sessions";
 
 const app: Application = express();
 const PORT: number = 5000;
@@ -13,12 +14,12 @@ const downloadSocket = new WebSocketServer({ noServer: true });
 const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 uploadSocket.on('connection', (ws: WebSocket, id: string) => {
-    ws.binaryType = 'nodebuffer';
+    ws.binaryType = 'arraybuffer';
     sessions[id] = { uploadConnection: new UploadConnection(ws, id) };
 });
 
 downloadSocket.on('connection', (ws: WebSocket, id: string) => {
-    ws.binaryType = 'nodebuffer';
+    ws.binaryType = 'arraybuffer';
     sessions[id].downloadConnection = new DownloadConnection(ws, id);
 });
 

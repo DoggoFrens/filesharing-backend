@@ -1,15 +1,16 @@
 import WebSocket from 'ws';
+import {
+    ChunkMessage,
+    ChunkRequestMessage,
+    ChunkSizeInfoMessage,
+    InfoMessage,
+    InfoRequestMessage,
+    Message,
+    MessageType
+} from '@doggofrens/filesharing-ws-proto';
+
 import { WebSocketConnection } from "./WebSocketConnection";
 import { Session, sessions } from './Sessions';
-import { AckMessage, 
-        ChunkMessage, 
-        InfoMessage, 
-        InfoRequestMessage, 
-        Message, 
-        MessageType, 
-        ChunkSizeInfoMessage ,
-        ChunkRequestMessage
-    } from '@doggofrens/filesharing-ws-proto';
 
 export class UploadConnection extends WebSocketConnection {
 

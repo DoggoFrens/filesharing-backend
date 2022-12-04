@@ -1,7 +1,12 @@
-import { InfoMessage, Message, MessageType } from '@doggofrens/filesharing-ws-proto';
 import WebSocket from 'ws';
+import {
+    ChunkMessage,
+    ChunkRequestMessage,
+    InfoMessage,
+    Message,
+    MessageType
+} from '@doggofrens/filesharing-ws-proto';
 import { WebSocketConnection } from "./WebSocketConnection";
-import { ChunkMessage, ChunkRequestMessage } from '@doggofrens/filesharing-ws-proto';
 import { sessions } from './Sessions';
 
 export class DownloadConnection extends WebSocketConnection {

@@ -1,11 +1,12 @@
 import WebSocket from 'ws';
-import { MessageType, 
-        Message, 
-        AckMessage, 
-        ChunkMessage, 
-        InfoMessage,
-        ChunkRequestMessage,
-    } from '@doggofrens/filesharing-ws-proto';
+import {
+    AckMessage,
+    ChunkMessage,
+    ChunkRequestMessage,
+    InfoMessage,
+    Message,
+    MessageType
+} from '@doggofrens/filesharing-ws-proto';
 
 export abstract class WebSocketConnection {
 
@@ -24,17 +25,19 @@ export abstract class WebSocketConnection {
         this.ws.send(message.toUint8Array());
     }
 
-    private static parseMessage(data: Buffer): Message | null {
-        const messageType = data.readUInt8(0);
+    private static parseMessage(data: ArrayBuffer): Message | null {
+        const _data = new Uint8Array(data);
+        const messageType = _data[0];
+
         switch (messageType) {
             case MessageType.Ack:
                 return new AckMessage();
             case MessageType.Info:
-                return InfoMessage.fromUint8Array(data);
+                return InfoMessage.fromUint8Array(_data);
             case MessageType.Chunk:
-                return ChunkMessage.fromUint8Array(data);
+                return ChunkMessage.fromUint8Array(_data);
             case MessageType.ChunkRequest:
-                return ChunkRequestMessage.fromUint8Array(data);
+                return ChunkRequestMessage.fromUint8Array(_data);
             default:
                 return null;
         }
