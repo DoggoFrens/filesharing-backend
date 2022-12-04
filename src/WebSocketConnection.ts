@@ -1,5 +1,11 @@
 import WebSocket from 'ws';
-import { MessageType, Message, AckMessage, FileChunkMessage, FileInfoMessage, FileInfoRequestMessage } from '@doggofrens/filesharing-ws-proto';
+import { MessageType, 
+        Message, 
+        AckMessage, 
+        ChunkMessage, 
+        InfoMessage,
+        ChunkRequestMessage,
+    } from '@doggofrens/filesharing-ws-proto';
 
 export abstract class WebSocketConnection {
 
@@ -9,12 +15,12 @@ export abstract class WebSocketConnection {
         this.ws = ws;
         ws.binaryType = 'nodebuffer';
 
-        ws.on('open', () => this.onOpen());
         ws.on('close', () => this.onClose());
         ws.on('message', data => this.handleMessage(WebSocketConnection.parseMessage(data as Buffer)));
     }
 
     protected send(message: Message): void {
+        console.log(message);
         this.ws.send(message.toUint8Array());
     }
 
@@ -23,16 +29,17 @@ export abstract class WebSocketConnection {
         switch (messageType) {
             case MessageType.Ack:
                 return new AckMessage();
-            case MessageType.FileInfo:
-                return FileInfoMessage.fromUint8Array(data);
-            case MessageType.FileChunk:
-                return FileChunkMessage.fromUint8Array(data);
+            case MessageType.Info:
+                return InfoMessage.fromUint8Array(data);
+            case MessageType.Chunk:
+                return ChunkMessage.fromUint8Array(data);
+            case MessageType.ChunkRequest:
+                return ChunkRequestMessage.fromUint8Array(data);
             default:
                 return null;
         }
     }
 
-    abstract onOpen(): void;
     abstract onClose(): void;
     abstract handleMessage(message: Message | null): void;
 }

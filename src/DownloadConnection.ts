@@ -1,7 +1,7 @@
-import { FileInfoMessage, Message, MessageType } from '@doggofrens/filesharing-ws-proto';
+import { InfoMessage, Message, MessageType } from '@doggofrens/filesharing-ws-proto';
 import WebSocket from 'ws';
 import { WebSocketConnection } from "./WebSocketConnection";
-import { FileChunkMessage } from '@doggofrens/filesharing-ws-proto';
+import { ChunkMessage, ChunkRequestMessage } from '@doggofrens/filesharing-ws-proto';
 import { sessions } from './Sessions';
 
 export class DownloadConnection extends WebSocketConnection {
@@ -10,19 +10,15 @@ export class DownloadConnection extends WebSocketConnection {
 
     constructor(ws: WebSocket, id: string) {
         super(ws);
-
         this.id = id;
-    }
-
-    onOpen(): void {
-        console.log('DownloadConnetion opened');
+        console.log('DownloadConnection opened');
 
         if (sessions[this.id] == null || sessions[this.id].name == null || sessions[this.id].size == null) {
             this.ws.close();
         }
 
         sessions[this.id].downloadConnection = this;
-        super.send(new FileInfoMessage(sessions[this.id].name!, sessions[this.id].size!));
+        super.send(new InfoMessage(sessions[this.id].name!, sessions[this.id].size!));
     }
 
     onClose(): void {
@@ -36,10 +32,11 @@ export class DownloadConnection extends WebSocketConnection {
             this.ws.close();
             return;
         }
+        console.log("Download ", message);
 
         switch (message.type) {
-            case MessageType.Ack:
-                sessions[this.id].uploadConnection.notifyChunkDownloaded();
+            case MessageType.ChunkRequest:
+                sessions[this.id].uploadConnection.forwardChunkRequest(message as ChunkRequestMessage);
                 break;
             default:
                 console.log('DownloadConnection: Unknown message type');
@@ -47,7 +44,7 @@ export class DownloadConnection extends WebSocketConnection {
         }
     }
 
-    sendChunkMessage(message: FileChunkMessage): void {
+    sendChunkMessage(message: ChunkMessage): void {
         super.send(message);
     }
 }

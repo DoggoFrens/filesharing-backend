@@ -1,15 +1,10 @@
 import express, { Application } from "express";
 import { IncomingMessage } from "http";
-import { parse } from 'query-string';
-import { URL } from 'url';
 import WebSocket, { WebSocketServer } from 'ws';
 import { DownloadConnection } from "./DownloadConnection";
 import { sessions } from "./Sessions";
 import { UploadConnection } from "./UploadConnection";
-
-function areQueryParamsValid(name: any, size: any) {
-    return name != null && size != null && typeof size === 'number';
-}
+import crypto from 'crypto';
 
 const app: Application = express();
 const PORT: number = 5000;
@@ -19,7 +14,7 @@ const server = app.listen(PORT, () => console.log(`Server running on port ${PORT
 
 uploadSocket.on('connection', (ws: WebSocket, id: string) => {
     ws.binaryType = 'nodebuffer';
-    sessions[id].uploadConnection = new UploadConnection(ws, id);
+    sessions[id] = { uploadConnection: new UploadConnection(ws, id) };
 });
 
 downloadSocket.on('connection', (ws: WebSocket, id: string) => {
@@ -33,22 +28,16 @@ server.on('upgrade', (request: IncomingMessage, socket, head) => {
         return;
     }
 
-    const reqUrl = new URL(request.url);
-    if (reqUrl.pathname === '/') {
-        const parsedQuery = parse(reqUrl.search, {parseNumbers: true});
+    const id = crypto.randomUUID();
 
-        if (!areQueryParamsValid(parsedQuery.name, parsedQuery.size)) {
-            request.destroy();
-            return;
-        }
 
-        const id = crypto.randomUUID();
+    if (request.url === '/') {
 
         uploadSocket.handleUpgrade(request, socket, head, (ws: WebSocket) => {
             uploadSocket.emit('connection', ws, id);
         });
     } else {
-        const id = reqUrl.pathname.slice(1);
+        const id = request.url.slice(1);
 
         if (!(id in sessions)) {
             request.destroy();

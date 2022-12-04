@@ -28,7 +28,7 @@
     "typescript": "^4.8.3"
   },
   "dependencies": {
-    "@doggofrens/filesharing-ws-proto": "^0.2.4",
+    "@doggofrens/filesharing-ws-proto": "^1.0.0",
     "@types/ws": "^8.5.3",
     "express": "^4.18.1",
     "query-string": "^7.1.1",
